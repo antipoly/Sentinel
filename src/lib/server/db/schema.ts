@@ -50,11 +50,15 @@ export const incident = pgTable("incident", {
   geolocation: text("geolocation"),
   type: incidentType("type").notNull(),
   severity: cautionLevel("severity").notNull(),
-  activeStatus: text("active_status"),
-  timestamp: timestamp("timestamp", {
+  resolvedAt: timestamp("resolved_at"),
+  author: text("author").references(() => user.id).notNull(),
+
+  createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "date",
-  }).notNull(),
+  })
+    .notNull()
+    .defaultNow(),
 });
 
 export const incident_comments = pgTable("incident_comments", {

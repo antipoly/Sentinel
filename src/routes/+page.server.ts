@@ -1,30 +1,60 @@
 import type { Actions, PageServerLoad } from "./$types";
 import { fail } from "@sveltejs/kit";
 import { db } from "$lib/server/db";
-import { incident, incidentType, cautionLevel } from "$lib/server/db/schema";
+import {
+  incident,
+  incidentType,
+  cautionLevel,
+  user,
+} from "$lib/server/db/schema";
+import { eq } from "drizzle-orm";
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
   try {
-    const incidents = await db.select().from(incident);
+    const incidents = await db
+      .select({
+        id: incident.id,
+        type: incident.type,
+        severity: incident.severity,
+        description: incident.description,
+        geolocation: incident.geolocation,
+        createdAt: incident.createdAt,
+        resolvedAt: incident.resolvedAt,
+        author: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        },
+      })
+      .from(incident)
+      .leftJoin(user, eq(incident.author, user.id));
+
     return {
-      incidents
+      incidents,
+      user: locals.user,
     };
   } catch (error) {
     console.error("Error loading incidents:", error);
     return {
-      incidents: []
+      incidents: [],
     };
   }
 };
 
 export const actions = {
-  createIncident: async ({ request }) => {
+  createIncident: async ({ request, locals }) => {
+    // Check if user is authenticated
+    if (!locals.user) {
+      return fail(401, {
+        message: "You must be logged in to report an incident",
+      });
+    }
     const data = await request.formData();
     const type = data.get("type")?.toString();
     const severity = data.get("severity")?.toString();
     const description = data.get("description")?.toString();
     const geolocation = data.get("geolocation")?.toString();
-    
+
     if (!type || !severity || !geolocation) {
       return fail(400, {
         message: "Missing required fields",
@@ -32,7 +62,7 @@ export const actions = {
     }
 
     // Validate geolocation format
-    const [lat, lng] = geolocation.split(',').map(Number);
+    const [lat, lng] = geolocation.split(",").map(Number);
     if (Number.isNaN(lat) || Number.isNaN(lng)) {
       return fail(400, {
         message: "Invalid geolocation format",
@@ -60,12 +90,12 @@ export const actions = {
         severity: validSeverity,
         description: description || null,
         geolocation,
-        activeStatus: "Active",
-        timestamp: new Date(),
+        author: locals.user.id,
+        createdAt: new Date(),
       });
-      
+
       return {
-        success: true
+        success: true,
       };
     } catch (error) {
       console.error("Error creating incident:", error);

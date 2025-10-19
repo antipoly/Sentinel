@@ -1,74 +1,16 @@
 {
-  "id": "8fd53c0f-d514-4fc6-a3e0-ba990e6a03c1",
+  "id": "ffc444be-7640-403b-ba97-181df0379501",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.comment_replies": {
-      "name": "comment_replies",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "parent_comment_id": {
-          "name": "parent_comment_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "child_comment_id": {
-          "name": "child_comment_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "comment_replies_parent_comment_id_incident_comments_id_fk": {
-          "name": "comment_replies_parent_comment_id_incident_comments_id_fk",
-          "tableFrom": "comment_replies",
-          "tableTo": "incident_comments",
-          "columnsFrom": [
-            "parent_comment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "comment_replies_child_comment_id_incident_comments_id_fk": {
-          "name": "comment_replies_child_comment_id_incident_comments_id_fk",
-          "tableFrom": "comment_replies",
-          "tableTo": "incident_comments",
-          "columnsFrom": [
-            "child_comment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.incident": {
       "name": "incident",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
           "notNull": true
         },
@@ -98,21 +40,42 @@
           "primaryKey": false,
           "notNull": true
         },
-        "active_status": {
-          "name": "active_status",
-          "type": "text",
+        "resolved_at": {
+          "name": "resolved_at",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false
         },
-        "timestamp": {
-          "name": "timestamp",
-          "type": "timestamp with time zone",
+        "author": {
+          "name": "author",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "incident_author_user_id_fk": {
+          "name": "incident_author_user_id_fk",
+          "tableFrom": "incident",
+          "tableTo": "user",
+          "columnsFrom": [
+            "author"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -125,19 +88,19 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
           "notNull": true
         },
         "incident_id": {
           "name": "incident_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "user_id": {
           "name": "user_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -190,19 +153,19 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
           "notNull": true
         },
         "incident_id": {
           "name": "incident_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "user_id": {
           "name": "user_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -218,13 +181,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "is_edited": {
-          "name": "is_edited",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
         }
       },
       "indexes": {},
@@ -268,19 +224,19 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
           "notNull": true
         },
         "incident_id": {
           "name": "incident_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
         "user_id": {
           "name": "user_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -333,13 +289,13 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
           "notNull": true
         },
         "user_id": {
           "name": "user_id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -378,7 +334,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "uuid",
+          "type": "text",
           "primaryKey": true,
           "notNull": true
         },

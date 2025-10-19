@@ -11,6 +11,13 @@ import {
 } from "./dto";
 import { ZodError } from "zod";
 
+export class DuplicateEmailError extends Error {
+  constructor(message = "This email is already in use.") {
+    super(message);
+    this.name = "DuplicateEmailError";
+  }
+}
+
 if (!env.DATABASE_URL) throw new Error("DATABASE_URL is not set");
 
 const client = postgres(env.DATABASE_URL);
@@ -39,7 +46,7 @@ export async function createDTOUser(data: CreateUserDto): Promise<schema.User> {
     });
 
     if (existingUser) {
-      throw new Error("This email is already in use.");
+      throw new DuplicateEmailError();
     }
 
     // Create the user
@@ -65,8 +72,10 @@ export async function createDTOUser(data: CreateUserDto): Promise<schema.User> {
 
     return user;
   } catch (error) {
+    // Rethrow Zod errors so callers can detect validation failures and
+    // return a 400 response instead of treating them as 500 server errors.
     if (error instanceof ZodError) {
-        throw new Error(`Validation error: ${error.message}`);
+      throw error;
     }
     throw error;
   }
@@ -81,6 +90,7 @@ export async function createDTOUser(data: CreateUserDto): Promise<schema.User> {
  */
 export async function createDTOIncident(
   data: CreateIncidentDto,
+  authorId: string,
 ): Promise<schema.Incident> {
   try {
     // Validate the input data using the DTO
@@ -88,14 +98,14 @@ export async function createDTOIncident(
 
     const incidentId = crypto.randomUUID();
     // Create the incident
-    const [newIncident] = await db.insert(schema.incident).values({
+    await db.insert(schema.incident).values({
       id: incidentId,
       type: validatedData.type,
       severity: validatedData.severity,
       description: validatedData.description || null,
       geolocation: `${validatedData.latitude},${validatedData.longitude}`,
-      activeStatus: "Active",
-      timestamp: new Date(),
+      author: authorId,
+      resolvedAt: null,
     });
 
     // Get the created incident
@@ -110,7 +120,7 @@ export async function createDTOIncident(
     return incident;
   } catch (error) {
     if (error instanceof ZodError) {
-      throw new Error(`Validation error: ${error.message}`);
+      throw error;
     }
     throw error;
   }

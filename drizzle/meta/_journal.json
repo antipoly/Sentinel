@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1760826078529,
-      "tag": "0000_amusing_titanium_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1760828199346,
-      "tag": "0001_strange_preak",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1760829139713,
-      "tag": "0002_worried_albert_cleary",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1760829598770,
-      "tag": "0003_square_landau",
+      "when": 1760893411270,
+      "tag": "0000_slippery_lady_bullseye",
       "breakpoints": true
     }
   ]

@@ -1,131 +1,163 @@
 <script lang="ts">
-	import { MapLibre, MapEvents, Marker, Popup } from "svelte-maplibre";
-	import maplibregl from "maplibre-gl";
-	import type { MapMouseEvent } from "maplibre-gl";
-	import IncidentForm from "$lib/components/forms/IncidentForm.svelte";
-  import Incidentinfo from "$lib/components/incidentinfo.svelte";
-	import Button from "$lib/components/ui/button.svelte";
-	import IncidentInfo from "$lib/components/incidentinfo.svelte";
-	import Sidebar from "$lib/components/ui/sidebar.svelte";
-	import type { Incident } from "$lib/server/db/schema";
+import { MapLibre, MapEvents, Marker, Popup } from "svelte-maplibre";
+import maplibregl from "maplibre-gl";
+import type { MapMouseEvent } from "maplibre-gl";
+import Button from "$lib/components/ui/button.svelte";
+import { invalidate } from "$app/navigation";
 
-	let { data } = $props();
+import LiveIncidents from "$lib/components/LiveIncidents.svelte";
+import IncidentForm from "$lib/components/forms/IncidentForm.svelte";
+import IncidentInfo from "$lib/components/IncidentInfo.svelte";
+import IncidentChat from "$lib/components/IncidentChat.svelte";
+import Sidebar from "$lib/components/ui/sidebar.svelte";
+import type { Incident } from "$lib/server/db/schema";
 
-	// Jamaica
-	let bounds = $state<maplibregl.LngLatBoundsLike>([-78.4, 17.7, -76.2, 18.5]);
-	// let displayBounds = $derived(bounds.map((b) => b.toFixed(4)).join(", "));
+let { data } = $props();
 
-	let showForm = $state(false);
-	let selectedIncident = $state<Incident | null>(null);
-	let reportedIncidents = $state<Incident[]>(data.incidents || []);
+// Default bounds (Jamaica)
+const DEFAULT_BOUNDS: maplibregl.LngLatBoundsLike = [-78.4, 17.7, -76.2, 18.5];
 
-	type MarkerData = {
-		incident?: Incident;
-		lngLat: { lng: number; lat: number };
-	};
+// Initialize bounds from localStorage or use default
+let bounds = $state<maplibregl.LngLatBoundsLike>(
+  typeof window !== "undefined"
+    ? JSON.parse(
+        localStorage.getItem("mapBounds") || JSON.stringify(DEFAULT_BOUNDS),
+      )
+    : DEFAULT_BOUNDS,
+);
 
-	let tempMarker = $state<MarkerData | null>(null);
+let showForm = $state(false);
+let selectedIncident = $state<Incident | null>(null);
+let reportedIncidents = $state<Incident[]>(
+  (data.incidents || []).map((i: any) => ({
+    ...i,
+    // If API returned an author object, use its id (or name) as a string; otherwise keep string|null
+    author:
+      typeof i.author === "object" && i.author !== null
+        ? (i.author.id as string)
+        : (i.author as string | null),
+    // Ensure createdAt/resolvedAt are Date objects (or null for resolvedAt)
+    createdAt: i.createdAt ? new Date(i.createdAt) : new Date(),
+    resolvedAt: i.resolvedAt ? new Date(i.resolvedAt) : null,
+  })) as Incident[],
+);
 
-	let markers = $derived([
-		...reportedIncidents.map((incident) => {
-			const [lat, lng] = incident.geolocation?.split(",").map(Number) || [0, 0];
-			return {
-				incident,
-				lngLat: { lng, lat }
-			} satisfies MarkerData;
-		}),
-		...(tempMarker ? [tempMarker] : [])
-	]);
+type MarkerData = {
+  incident?: Incident;
+  lngLat: { lng: number; lat: number };
+};
 
-	function toggleIncidentForm() {
-		selectingLocation = true;
+let tempMarker = $state<MarkerData | null>(null);
 
-		showForm = !showForm;
-		if (!showForm) {
-			tempMarker = null;
-		}
-	}
+let markers = $derived([
+  ...reportedIncidents.map((incident) => {
+    const [lat, lng] = incident.geolocation?.split(",").map(Number) || [0, 0];
+    return {
+      incident,
+      lngLat: { lng, lat },
+    } satisfies MarkerData;
+  }),
+  ...(tempMarker ? [tempMarker] : []),
+]);
 
-	let selectingLocation = $state(false);
+function toggleIncidentForm() {
+  selectingLocation = true;
 
-	function createIncident() {
-		if (showForm) {
-			// If closing the form
-			showForm = false;
-			tempMarker = null;
-			selectingLocation = false;
-		} else {
-			// Start location selection mode
-			selectingLocation = !selectingLocation;
-		}
-	}
+  showForm = !showForm;
+  if (!showForm) {
+    tempMarker = null;
+  }
+}
 
-	function addMarker(e: MapMouseEvent) {
-		// Only add marker if we're in location selection mode
-		if (!selectingLocation) return;
+let selectingLocation = $state(false);
 
-		const { lngLat } = e;
-		tempMarker = {
-			lngLat: { lng: lngLat.lng, lat: lngLat.lat }
-		};
-		selectingLocation = false;
-		showForm = true;
-	}
+function handleMarkerClick(marker: MarkerData) {
+  if (marker.incident) {
+    selectedIncident = marker.incident;
+  }
+}
 
-	function handleSuccess(result: any) {
-		if (result.data) {
-			const incident = result.data;
-			console.log('New incident:', incident);
-			
-			// Update the incidents list
-			const updatedIncidents = [...reportedIncidents, incident];
-			console.log('Updated incidents:', updatedIncidents);
-			reportedIncidents = updatedIncidents;
+function closeIncidentInfo() {
+  selectedIncident = null;
+}
 
-			// Force markers update
-			const [lat, lng] = incident.geolocation?.split(",").map(Number) || [0, 0];
-			const newMarker: MarkerData = {
-				incident,
-				lngLat: { lng, lat }
-			};
-			markers = [...markers.filter(m => m !== tempMarker), newMarker];
+function openChat() {
+  if (selectedIncident) {
+  }
+}
 
-			// Clean up state
-			tempMarker = null;
-			showForm = false;
-			selectingLocation = false;
-		}
-	}
+function createIncident() {
+  if (showForm) {
+    // If closing the form
+    showForm = false;
+    tempMarker = null;
+    selectingLocation = false;
+  } else {
+    // Start location selection mode
+    selectingLocation = !selectingLocation;
+  }
+}
 
-	function handleMarkerClick(incident: Incident) {
-		selectedIncident = incident;
+function addMarker(e: MapMouseEvent) {
+  // Only add marker if we're in location selection mode
+  if (!selectingLocation) return;
 
+  const { lngLat } = e;
+  tempMarker = {
+    lngLat: { lng: lngLat.lng, lat: lngLat.lat },
+  };
+  selectingLocation = false;
+  showForm = true;
+}
 
-	}
+interface FormResult {
+  data?: {
+    id: string;
+    [key: string]: unknown;
+  };
+}
 
-	function closeIncidentInfo() {
-		selectedIncident = null;
-	}
+async function handleSuccess(result: FormResult) {
+  if (result.data) {
+    // Clean up state
+    tempMarker = null;
+    showForm = false;
+    selectingLocation = false;
+
+    // Invalidate the page data to trigger a refresh (invalidate the current route)
+    location.reload();
+  }
+}
 </script>
 
-<Sidebar>
-	<div class="relative w-full h-full">
+<Sidebar incidents={reportedIncidents} user={data.user || null}>
+	<div class="relative flex w-full h-full">
 		<MapLibre
 			style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 			class="relative w-full h-full"
 			standardControls
 			bind:bounds
+			onmoveend={() => {
+				localStorage.setItem('mapBounds', JSON.stringify(bounds));
+			}}
 		>
 			<MapEvents onclick={addMarker} />
 
-			{#each markers as { incident, lngLat }}
-				<Marker lngLat={[lngLat.lng, lngLat.lat]}>
-					<div
-						class="marker-pin {!incident ? 'text-red-500 animate-bounce' : ''}"
-						on:click={() => incident && handleMarkerClick(incident)}
+			{#each markers as marker (marker.incident?.id ?? `temp-${marker.lngLat.lng}-${marker.lngLat.lat}`)}
+				<Marker lngLat={[marker.lngLat.lng, marker.lngLat.lat]}>
+					<button
+						type="button"
+						class="marker-pin {!marker.incident
+							? 'text-red-500 animate-bounce'
+							: ''}"
+						onclick={() => handleMarkerClick(marker)}
+						onkeydown={(e) => e.key === "Enter" && handleMarkerClick(marker)}
+						aria-label={marker.incident
+							? `View incident details at ${marker.lngLat.lat}, ${marker.lngLat.lng}`
+							: "Temporary marker"}
 					>
-						{incident ? "📍" : "📌"}
-					</div>
+						{marker.incident ? "📍" : "📌"}
+					</button>
 				</Marker>
 			{/each}
 		</MapLibre>
@@ -139,23 +171,39 @@
 		{/if}
 
 		<div class="absolute bottom-12 right-6">
-			<Button
-				variant="secondary"
-				size="lg"
-				onclick={createIncident}
-				class="z-50 rounded-full shadow-lg hover:shadow-xl transition-shadow duration-200 {selectingLocation
-					? 'bg-blue-400'
-					: 'bg-red-400'}"
-			>
-				{selectingLocation ? "Cancel" : "Report Incident"}
-			</Button>
+      <div class="flex flex-col-reverse gap-5">
+        <Button
+          variant="secondary"
+          size="lg"
+          onclick={createIncident}
+          class="z-50 rounded-full text-white shadow-lg hover:shadow-xl transition-shadow duration-200 {selectingLocation
+            ? 'bg-blue-400'
+            : 'bg-red-400'}"
+        >
+          {selectingLocation ? "Cancel" : "Report Incident"}
+        </Button>
+
+        {#if selectedIncident}
+           <Button
+            variant="secondary"
+            size="lg"
+            onclick={openChat}
+            class="z-50 rounded-full text-white shadow-lg hover:shadow-xl transition-shadow duration-200 bg-green-400"
+          >
+            Chat
+          </Button>
+        {/if}
+       
+      </div>
 		</div>
 
 		{#if selectedIncident}
 			<div
-				class="absolute top-0 right-0 h-full w-80 bg-white shadow-lg p-4 overflow-y-auto"
+				class="absolute top-0 right-0 h-full w-96 bg-white shadow-lg p-4 overflow-y-auto"
 			>
 				<IncidentInfo incident={selectedIncident} onClose={closeIncidentInfo} />
+				<IncidentChat  />
+
 			</div>
 		{/if}
 	</div>

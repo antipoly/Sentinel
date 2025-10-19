@@ -1,141 +1,166 @@
-  <script lang="ts">
-    import { enhance } from '$app/forms';
-    import { goto } from '$app/navigation';
+<script lang="ts">
+	import { enhance } from "$app/forms";
+	import { goto } from "$app/navigation";
 
-    let error: string | null = null;
-    let loading = false;
-  </script>
+	let error: string | null = null;
+	let loading = false;
+</script>
 
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Create your account
-        </h2>
-      </div>
-      <form method="POST" use:enhance={() => {
-        loading = true;
-        error = null;
+<div
+	class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
+>
+	<div class="max-w-md w-full space-y-8">
+		<div>
+			<h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+				Create your account
+			</h2>
+		</div>
+		<form
+			method="POST"
+			use:enhance={() => {
+				loading = true;
+				error = null;
 
-        return async ({ result }) => {
-          loading = false;
-          if (result.type === 'failure') {
-            error = result.data?.message as string;
-          } else if (result.type === 'success') {
-            goto('/');
-          }
-        };
-      }} class="mt-8 space-y-6">
-        <div class="rounded-md shadow-sm -space-y-px">
-          
-          <div>
-            <label for="name" class="sr-only">Full name</label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Full name"
-            />
-          </div>
-          <div>
-            <label for="email" class="sr-only">Email address</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Email address"
-            />
-          </div>
-          <div>
-            <label for="phoneNumber" class="sr-only">Phone Number</label>
-            <input
-              id="phoneNumber"
-              name="phoneNumber"
-              type="number"
-              required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Phone Number"
-            />
-          </div>
-          <div>
-            <label for="dob" class="sr-only">Date of Birth</label>
-            <input
-              id="dob"
-              name="dob"
-              type="date"
-              required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Date of Birth"
-            />
-          </div>
-          
-          <div>
-            <label for="password" class="sr-only">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Password"
-            />
-          </div>
-          
-          <div>
-            <label for="password" class="sr-only">Confirm Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Confirm Password"
-            />
-          </div>
-        </div>
+				return async ({ result }) => {
+					loading = false;
+					if (result.type === "failure") {
+						error = result.data?.message as string;
+					} else if (result.type === "redirect") {
+						// Let SvelteKit handle the redirect
+						return;
+					}
+				};
+			}}
+			class="mt-8 space-y-6"
+		>
+			<div class="rounded-md shadow-sm -space-y-px">
+				<div>
+					<label for="name" class="sr-only">Full name</label>
+					<input
+						id="name"
+						name="name"
+						type="text"
+						required
+						class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+						placeholder="Full name"
+					/>
+				</div>
+				<div>
+					<label for="email" class="sr-only">Email address</label>
+					<input
+						id="email"
+						name="email"
+						type="email"
+						required
+						class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+						placeholder="Email address"
+					/>
+				</div>
+				<div>
+					<label for="phoneNumber" class="sr-only">Phone Number</label>
+					<input
+						id="phoneNumber"
+						name="phoneNumber"
+						type="number"
+						required
+						class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+						placeholder="Phone Number"
+					/>
+				</div>
+				<div>
+					<label for="dob" class="sr-only">Date of Birth</label>
+					<input
+						id="dob"
+						name="dob"
+						type="date"
+						required
+						class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+						placeholder="Date of Birth"
+					/>
+				</div>
 
-        {#if error}
-          <div class="rounded-md bg-red-50 p-4">
-            <div class="flex">
-              <div class="ml-3">
-                <h3 class="text-sm font-medium text-red-800">
-                  {error}
-                </h3>
-              </div>
-            </div>
-          </div>
-        {/if}
+				<div>
+					<label for="password" class="sr-only">Password</label>
+					<input
+						id="password"
+						name="password"
+						type="password"
+						required
+						class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+						placeholder="Password"
+					/>
+				</div>
 
-        <div>
-          <button
-            type="submit"
-            disabled={loading}
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-          >
-            {#if loading}
-              <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                <!-- Loading spinner -->
-                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-              </span>
-              Creating account...
-            {:else}
-              Sign up
-            {/if}
-          </button>
-        </div>
+				<div>
+					<label for="password" class="sr-only">Confirm Password</label>
+					<input
+						id="password"
+						name="password"
+						type="password"
+						required
+						class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+						placeholder="Confirm Password"
+					/>
+				</div>
+			</div>
 
-        <div class="text-sm text-center">
-          <a href="/login" class="font-medium text-indigo-600 hover:text-indigo-500">
-            Already have an account? Sign in
-          </a>
-        </div>
-      </form>
-    </div>
-  </div>
+			{#if error}
+				<div class="rounded-md bg-red-50 p-4">
+					<div class="flex">
+						<div class="ml-3">
+							<h3 class="text-sm font-medium text-red-800">
+								{error}
+							</h3>
+						</div>
+					</div>
+				</div>
+			{/if}
+
+			<div>
+				<button
+					type="submit"
+					disabled={loading}
+					class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+				>
+					{#if loading}
+						<span class="absolute left-0 inset-y-0 flex items-center pl-3">
+							<!-- Loading spinner -->
+							<svg
+								class="animate-spin h-5 w-5 text-white"
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+							>
+								<circle
+									class="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									stroke-width="4"
+								></circle>
+								<path
+									class="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+								></path>
+							</svg>
+						</span>
+						Creating account...
+					{:else}
+						Sign up
+					{/if}
+				</button>
+			</div>
+
+			<div class="text-sm text-center">
+				<a
+					href="/login"
+					class="font-medium text-indigo-600 hover:text-indigo-500"
+				>
+					Already have an account? Sign in
+				</a>
+			</div>
+		</form>
+	</div>
+</div>

@@ -1,4 +1,4 @@
-import { fail, redirect } from "@sveltejs/kit";
+import { fail, redirect,  } from "@sveltejs/kit";
 import type { Actions } from "./$types";
 import { validateUser } from "$lib/server/auth/utils";
 import {
@@ -31,7 +31,7 @@ export const actions: Actions = {
       // Set session cookie
       setSessionTokenCookie(event, token, session.expiresAt);
 
-      throw redirect(303, "/");
+      return redirect(303, "/");
     } catch (error) {
       console.error("Login error:", error);
       return fail(500, { message: "Could not log in. Please try again." });
