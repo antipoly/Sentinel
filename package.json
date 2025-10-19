@@ -16,8 +16,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:drop": "drizzle-kit drop",
     "db:studio": "drizzle-kit studio",
-    "deploy": "pnpm run build && wrangler deploy",
-    "deploy:dev": "pnpm run build && wrangler deploy --config wrangler.dev.toml"
+    "vercel-build": "pnpm run db:migrate && pnpm run build"
   },
   "devDependencies": {
     "@oslojs/crypto": "^1.0.1",
@@ -42,6 +41,7 @@
   "dependencies": {
     "@googlemaps/js-api-loader": "^2.0.1",
     "@types/ws": "^8.18.1",
+    "@vercel/postgres": "^0.10.0",
     "bcrypt": "^6.0.0",
     "clsx": "^2.1.1",
     "kafkajs": "^2.2.4",
