@@ -1,5 +1,22 @@
 import type { UserType } from "./schema";
+import { incidentType, cautionLevel } from "./schema";
 import { z } from "zod";
+
+export const createIncidentDto = z.object({
+  type: z.enum(incidentType.enumValues),
+  severity: z.enum(cautionLevel.enumValues),
+  description: z.string().optional(),
+  latitude: z
+    .number()
+    .min(-90, "Latitude must be between -90 and 90 degrees")
+    .max(90, "Latitude must be between -90 and 90 degrees"),
+  longitude: z
+    .number()
+    .min(-180, "Longitude must be between -180 and 180 degrees")
+    .max(180, "Longitude must be between -180 and 180 degrees"),
+});
+
+export type CreateIncidentDto = z.infer<typeof createIncidentDto>;
 
 export const createUserDto = z.object({
   email: z.email("Invalid email address"),
@@ -24,7 +41,6 @@ export const createUserDto = z.object({
     const now = new Date();
     const age = now.getFullYear() - date.getFullYear();
     const monthDiff = now.getMonth() - date.getMonth();
-
 
     if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < date.getDate())) {
       return age - 1 >= 13;

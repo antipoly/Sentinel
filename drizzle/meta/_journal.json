@@ -15,6 +15,20 @@
       "when": 1760828199346,
       "tag": "0001_strange_preak",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1760829139713,
+      "tag": "0002_worried_albert_cleary",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1760829598770,
+      "tag": "0003_square_landau",
+      "breakpoints": true
     }
   ]
 }

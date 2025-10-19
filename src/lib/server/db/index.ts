@@ -3,7 +3,12 @@ import postgres from "postgres";
 import * as schema from "./schema";
 import { env } from "$env/dynamic/private";
 import { eq } from "drizzle-orm";
-import { createUserDto, type CreateUserDto } from "./dto";
+import {
+  createUserDto,
+  type CreateUserDto,
+  createIncidentDto,
+  type CreateIncidentDto,
+} from "./dto";
 import { ZodError } from "zod";
 
 if (!env.DATABASE_URL) throw new Error("DATABASE_URL is not set");
@@ -49,17 +54,64 @@ export async function createDTOUser(data: CreateUserDto): Promise<schema.User> {
       type: validatedData.type,
     });
 
-    // Fetch the created user
-    const newUser = await db.query.user.findFirst({
+    // Get the created user
+    const user = await db.query.user.findFirst({
       where: eq(schema.user.id, userId),
     });
 
-    if (!newUser) {
-      throw new Error("Failed to create user: User not found after insertion");
+    if (!user) {
+      throw new Error("Failed to create user");
     }
 
-    return newUser;
+    return user;
   } catch (error) {
+    if (error instanceof ZodError) {
+        throw new Error(`Validation error: ${error.message}`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Creates a new incident using the CreateIncidentDto for validation.
+ *
+ * @param data - The incident data conforming to CreateIncidentDto
+ * @throws {ValidationError} If the data fails validation
+ * @returns The created incident
+ */
+export async function createDTOIncident(
+  data: CreateIncidentDto,
+): Promise<schema.Incident> {
+  try {
+    // Validate the input data using the DTO
+    const validatedData = createIncidentDto.parse(data);
+
+    const incidentId = crypto.randomUUID();
+    // Create the incident
+    const [newIncident] = await db.insert(schema.incident).values({
+      id: incidentId,
+      type: validatedData.type,
+      severity: validatedData.severity,
+      description: validatedData.description || null,
+      geolocation: `${validatedData.latitude},${validatedData.longitude}`,
+      activeStatus: "Active",
+      timestamp: new Date(),
+    });
+
+    // Get the created incident
+    const incident = await db.query.incident.findFirst({
+      where: eq(schema.incident.id, incidentId),
+    });
+
+    if (!incident) {
+      throw new Error("Failed to create incident");
+    }
+
+    return incident;
+  } catch (error) {
+    if (error instanceof ZodError) {
+      throw new Error(`Validation error: ${error.message}`);
+    }
     throw error;
   }
 }

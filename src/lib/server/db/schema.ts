@@ -2,10 +2,9 @@ import {
   pgTable,
   serial,
   integer,
-  text,
   timestamp,
   pgEnum,
-  uuid,
+  text,
   boolean,
 } from "drizzle-orm/pg-core";
 
@@ -32,7 +31,7 @@ export const cautionLevel = pgEnum("caution_level", [
 ]);
 
 export const user = pgTable("user", {
-  id: uuid("id").primaryKey(),
+  id: text("id").primaryKey(),
   email: text("email").unique(),
   phoneNumber: text("phone_number").notNull(),
   name: text("name"),
@@ -46,7 +45,7 @@ export const user = pgTable("user", {
 });
 
 export const incident = pgTable("incident", {
-  id: uuid("id").primaryKey(),
+  id: text("id").primaryKey(),
   description: text("description"),
   geolocation: text("geolocation"),
   type: incidentType("type").notNull(),
@@ -58,15 +57,12 @@ export const incident = pgTable("incident", {
   }).notNull(),
 });
 
-// comments
-//
-
 export const incident_comments = pgTable("incident_comments", {
-  id: uuid("id").primaryKey(),
-  incidentId: uuid("incident_id")
+  id: text("id").primaryKey(),
+  incidentId: text("incident_id")
     .notNull()
     .references(() => incident.id),
-  userId: uuid("user_id")
+  userId: text("user_id")
     .notNull()
     .references(() => user.id),
   content: text("content").notNull(),
@@ -76,26 +72,14 @@ export const incident_comments = pgTable("incident_comments", {
   })
     .notNull()
     .defaultNow(),
-  isEdited: boolean("is_edited").notNull().default(false),
-});
-
-// Separate table for comment replies to handle the self-referential relationship
-export const comment_replies = pgTable("comment_replies", {
-  id: uuid("id").primaryKey(),
-  parentCommentId: uuid("parent_comment_id")
-    .notNull()
-    .references(() => incident_comments.id),
-  childCommentId: uuid("child_comment_id")
-    .notNull()
-    .references(() => incident_comments.id),
 });
 
 export const incident_assignee = pgTable("incident_assignee", {
-  id: uuid("id").primaryKey(),
-  incidentId: uuid("incident_id")
+  id: text("id").primaryKey(),
+  incidentId: text("incident_id")
     .notNull()
     .references(() => incident.id),
-  userId: uuid("user_id")
+  userId: text("user_id")
 
     .notNull()
     .references(() => user.id),
@@ -108,11 +92,11 @@ export const incident_assignee = pgTable("incident_assignee", {
 });
 
 export const incident_witnesses = pgTable("incident_witnesses", {
-  id: uuid("id").primaryKey(),
-  incidentId: uuid("incident_id")
+  id: text("id").primaryKey(),
+  incidentId: text("incident_id")
     .notNull()
     .references(() => incident.id),
-  userId: uuid("user_id")
+  userId: text("user_id")
     .notNull()
     .references(() => user.id),
   reportedAt: timestamp("reported_at", {
@@ -125,7 +109,7 @@ export const incident_witnesses = pgTable("incident_witnesses", {
 
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
-  userId: uuid("user_id")
+  userId: text("user_id")
     .notNull()
     .references(() => user.id),
   expiresAt: timestamp("expires_at", {
